@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "CustomerInfoEvents": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7072"
+    }
+  }
+}
