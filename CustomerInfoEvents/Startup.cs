@@ -22,28 +22,32 @@ namespace CustomerInfoEvents
 				.AddJsonFile("local.settings.json", optional: true, reloadOnChange: true)
 				.AddEnvironmentVariables()
 				.Build();
-			string topicEndpointUri = Environment.GetEnvironmentVariable("EventGridAttribute.TopicEndpointUri");
-
+			/*
 			builder.Services.AddOptions<CosmosDBOptions>()
 				.Configure<IConfiguration>((settings, configuration) =>
 				{
 					configuration.GetSection("CosmosDb").Bind(settings);
 				});
+			*/
 
-			var cosmosDbSettings = configuration.GetSection("CosmosDb").GetValue<string>("ConnectionString");
-			ProvisionCosmosDbAndContainers(cosmosDbSettings).GetAwaiter().GetResult();
+			var cosmosDbSettings = new CosmosDbSettings();
+			configuration.Bind("CosmosDb", cosmosDbSettings);
+			builder.Services.AddSingleton(cosmosDbSettings);
+
+			this.ProvisionCosmosDbAndContainers(cosmosDbSettings).GetAwaiter().GetResult();
 
 			builder.Services.AddTransient<ICustomerEvents, CustomerEvents>();
 
 			var eventGridSettings = new EventGridSettings();
 			configuration.Bind("EventGrid", eventGridSettings);
 			builder.Services.AddSingleton(eventGridSettings);
+			builder.Services.AddLogging();
 
 		}
 
-		private async Task ProvisionCosmosDbAndContainers(string connectiongString)
+		private async Task ProvisionCosmosDbAndContainers(CosmosDbSettings cosmosDbSettings)
 		{
-			CosmosClient cosmosClient = new CosmosClient(connectiongString);
+			CosmosClient cosmosClient = new CosmosClient(cosmosDbSettings.ConnectionString);
 			Microsoft.Azure.Cosmos.Database database = await cosmosClient.CreateDatabaseIfNotExistsAsync("CustomerDb");
 			await database.CreateContainerIfNotExistsAsync("Customers", "/id");
 

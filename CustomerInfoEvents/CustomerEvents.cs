@@ -22,7 +22,7 @@ namespace CustomerInfoEvents
 		{
 			_eventGridSettings = eventGridSettings ?? throw new ArgumentNullException(nameof(eventGridSettings));
 
-			if (!string.IsNullOrEmpty(_eventGridSettings.ApiKey) && !string.IsNullOrEmpty(_eventGridSettings.EndpointURL))
+			if (string.IsNullOrEmpty(_eventGridSettings.ApiKey) && string.IsNullOrEmpty(_eventGridSettings.EndpointURL))
 			{
 				throw new ArgumentNullException(nameof(_eventGridSettings));
 			}
